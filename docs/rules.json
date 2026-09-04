@@ -178,7 +178,7 @@
         "\\blet me know if\\b",
         "\\bwould you like me to\\b",
         "\\bhappy to (?:help|dig|walk|expand|elaborate)\\b",
-        "\\bhere'?s (?:a|the) (?:quick |short |brief )?(?:rundown|breakdown|summary) (?:of|for) you\\b",
+        "\\bhere'?s (?:a|the) (?:quick |short |brief )?(?:rundown|breakdown|summary|walkthrough|overview)\\b",
         "\\bi (?:cannot|can'?t) (?:help|assist) with\\b"
       ],
       "notInQuotes": true
