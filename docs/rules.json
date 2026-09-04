@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "_note": "CLI(claudish_check.py)와 웹이 함께 읽는 유일한 판정 표. 정규식은 파이썬 re 와 JS RegExp 가 똑같이 해석하는 문법만 씁니다: 리터럴, [] 문자군, \\b \\s, (?: ), | , ^ $, (?= ), (?! ), 반복. 뒤돌아보기(lookbehind)와 \\w \\d 는 두 엔진의 유니코드 처리가 달라 쓰지 않습니다. patterns 항목은 문자열이거나 {\"re\":..., \"guards\":[...], \"skip\":[...]} 형태입니다. 모든 패턴은 문장 하나에 대해, JS RegExp 와 같도록 ASCII 모드(파이썬은 re.ASCII)로 검사합니다. 갈래에 caseSensitive:true 를 주면 대소문자를 구분하고, repeatLimit:N 을 주면 같은 문자열이 N개 문장을 넘겨 나올 때 그 논문의 용어로 보아 제외합니다. notInQuotes:true 인 갈래는 큰따옴표 안(면담 인용문 등)에서 나온 것을 세지 않습니다. 패턴에 opt:true 를 주면 '정식 용어로도 흔한' 낱말로 표시됩니다. 기본은 켜져 있고, CLI --loose / 웹 체크상자 해제로 끕니다.",
+  "_note": "CLI(claudish_check.py)와 웹이 함께 읽는 유일한 판정 표. 정규식은 파이썬 re 와 JS RegExp 가 똑같이 해석하는 문법만 씁니다: 리터럴, [] 문자군, \\b \\s, (?: ), | , ^ $, (?= ), (?! ), 반복. 뒤돌아보기(lookbehind)와 \\w \\d 는 두 엔진의 유니코드 처리가 달라 쓰지 않습니다. patterns 항목은 문자열이거나 {\"re\":..., \"guards\":[...], \"skip\":[...]} 형태입니다. 모든 패턴은 문장 하나에 대해, JS RegExp 와 같도록 ASCII 모드(파이썬은 re.ASCII)로 검사합니다. 갈래에 caseSensitive:true 를 주면 대소문자를 구분하고, repeatLimit:N 을 주면 같은 문자열이 N개 문장을 넘겨 나올 때 그 논문의 용어로 보아 제외합니다. notInQuotes:true 인 갈래는 큰따옴표 안(면담 인용문 등)에서 나온 것을 세지 않습니다. 기본은 켜져 있고, CLI --loose / 웹 체크상자 해제로 끕니다.",
   "options": {
     "minSentenceWords": 3,
     "emdashPerSentence": 2,
@@ -382,54 +382,18 @@
         "\\blow[ -]hanging fruit\\b",
         "\\bat the end of the day\\b",
         "\\bland(?:ed|s) (?:in|on) (?:main|master|trunk|production|the (?:repo|branch))\\b",
-        {
-          "re": "\\bthe [a-z]+ surface\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bthe [a-z]+ layer\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bthe (?:safest|shortest|obvious|easiest|only|right) path\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bhard boundary\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bblockers?\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bstale\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bcanonical\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bdrift(?:s|ed|ing)?\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bprovenance\\b",
-          "opt": true
-        },
-        {
-          "re": "\\blineage\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bcalibration\\b",
-          "opt": true
-        },
-        {
-          "re": "\\brouting\\b",
-          "opt": true
-        },
+        "\\bthe [a-z]+ surface\\b",
+        "\\bthe [a-z]+ layer\\b",
+        "\\bthe (?:safest|shortest|obvious|easiest|only|right) path\\b",
+        "\\bhard boundary\\b",
+        "\\bblockers?\\b",
+        "\\bstale\\b",
+        "\\bcanonical\\b",
+        "\\bdrift(?:s|ed|ing)?\\b",
+        "\\bprovenance\\b",
+        "\\blineage\\b",
+        "\\bcalibration\\b",
+        "\\brouting\\b",
         "\\bsits? at the intersection of\\b",
         "\\ba lens through which\\b",
         "\\bunpacks? (?:this|that|the|these)\\b",
@@ -466,10 +430,7 @@
       },
       "patterns": [
         "\\b[a-z]{3,}-(?:gated|backed|side|first|safe|matched|layer|surface|path|boundary|adjacent|native)\\b",
-        {
-          "re": "\\b[a-z]{3,}-level\\b",
-          "opt": true
-        }
+        "\\b[a-z]{3,}-level\\b"
       ],
       "skip": [
         "^(?:client|server|browser|host|device|edge|cloud|front|back|supply|demand|sell|buy|user|street|road)-side$",
@@ -551,26 +512,11 @@
           ]
         },
         "\\bimplicates? (?:a|an|the) [a-z]+ (?:mechanism|process|account)\\b",
-        {
-          "re": "\\bconfirmatory\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bprotocols?\\b",
-          "opt": true
-        },
-        {
-          "re": "\\blower bounds?\\b",
-          "opt": true
-        },
-        {
-          "re": "\\b(?:each|every|the) cells? of the\\b",
-          "opt": true
-        },
-        {
-          "re": "\\bmatched (?:control|sample|pair)",
-          "opt": true
-        },
+        "\\bconfirmatory\\b",
+        "\\bprotocols?\\b",
+        "\\blower bounds?\\b",
+        "\\b(?:each|every|the) cells? of the\\b",
+        "\\bmatched (?:control|sample|pair)",
         "\\bnon-?trivial\\b",
         "\\bnon-?obvious\\b",
         "\\b(?:first|second|higher)[- ]order (?:concern|effect|question|issue|problem|approximation)\\b",

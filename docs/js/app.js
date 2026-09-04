@@ -22,7 +22,6 @@ let report = null;
 let picked = null;
 let busy = false;
 let filter = null;
-let strict = true;
 
 const detOf = id => RULES.detectors.find(d => d.id === id);
 const labelOf = id => detOf(id).label[getLang()] || detOf(id).label.en;
@@ -34,7 +33,6 @@ const adviceOf = id => detOf(id).advice[getLang()] || detOf(id).advice.en;
 
 function applyStatic() {
   document.title = t().title;
-  for (const n of document.querySelectorAll('.opt')) n.title = t().strictTip;
   for (const n of document.querySelectorAll('[data-i18n]')) {
     const v = t()[n.dataset.i18n];
     if (typeof v === 'string') n.textContent = v;
@@ -80,7 +78,7 @@ async function run(file) {
       setProgress(p, n, t().page, t().extracting));
 
     setProgress(doc.pages, doc.pages, t().page, t().scanning);
-    const rep = analyze(doc.lines, RULES, strict);
+    const rep = analyze(doc.lines, RULES);
     report = { file: file.name, doc, ...rep };
 
     $('#progress').hidden = true;
@@ -328,18 +326,6 @@ function wire() {
   $('#reset').onclick = reset;
   $('#reset-bottom').onclick = reset;
   $('#run').onclick = () => picked && run(picked);
-  $('#strict').checked = strict;
-  $('#strict2').checked = strict;
-  $('#strict').onchange = e => { strict = e.target.checked; $('#strict2').checked = strict; };
-  $('#strict2').onchange = e => {
-    strict = e.target.checked;
-    $('#strict').checked = strict;
-    if (report) {                       // 다시 읽을 필요 없이 판정만 새로 한다
-      filter = null;
-      report = { ...report, ...analyze(report.doc.lines, RULES, strict) };
-      render();
-    }
-  };
 
   let depth = 0;
   document.addEventListener('dragenter', e => {

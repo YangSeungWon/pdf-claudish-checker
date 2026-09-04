@@ -7,7 +7,7 @@ import { linesFromText } from '../docs/js/prose.js';
 const rules = compileRules(JSON.parse(readFileSync(
   new URL('../docs/rules.json', import.meta.url), 'utf8')));
 const text = readFileSync(process.argv[2], 'utf8');
-const rep = analyze(linesFromText(text), rules, !process.argv.includes('--loose'));
+const rep = analyze(linesFromText(text), rules);
 
 process.stdout.write(JSON.stringify({
   words: rep.words,

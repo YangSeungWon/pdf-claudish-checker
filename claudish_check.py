@@ -54,7 +54,6 @@ def load_rules(path: str = RULES_PATH) -> dict:
             if isinstance(p, str):
                 p = {"re": p}
             d["_pat"].append({
-                "opt": bool(p.get("opt")),
                 "re": re.compile(p["re"], flags),
                 "guard": [re.compile(g, re.IGNORECASE | re.ASCII)
                           for g in p.get("guards", [])],
@@ -383,7 +382,7 @@ def quote_spans(sent: str) -> list[tuple[int, int]]:
     return out
 
 
-def scan_sentence(sent: str, rules: dict, strict: bool = True) -> list[dict]:
+def scan_sentence(sent: str, rules: dict) -> list[dict]:
     """한 문장에서 나온 패턴 히트."""
     hits = []
     quotes = quote_spans(sent) if '"' in sent else []
@@ -394,8 +393,6 @@ def scan_sentence(sent: str, rules: dict, strict: bool = True) -> list[dict]:
             continue
         in_quote = d.get("notInQuotes") and quotes
         for pat in d["_pat"]:
-            if pat["opt"] and not strict:
-                continue
             if any(g.search(sent) for g in pat["guard"]):
                 continue
             for m in pat["re"].finditer(sent):
@@ -523,7 +520,7 @@ def structural_hits(sents: list[dict], rules: dict) -> None:
                 })
 
 
-def analyze(text: str, rules: dict, strict: bool = True) -> dict:
+def analyze(text: str, rules: dict) -> dict:
     opt = rules["options"]
     sents: list[dict] = []
     for pi, lines in enumerate(prose_paragraphs(text, rules)):
@@ -542,7 +539,7 @@ def analyze(text: str, rules: dict, strict: bool = True) -> dict:
             })
 
     for s in sents:
-        s["hits"] = scan_sentence(s["text"], rules, strict)
+        s["hits"] = scan_sentence(s["text"], rules)
     terms = drop_repeated_terms(sents, rules)
     structural_hits(sents, rules)
 
@@ -655,9 +652,6 @@ def main() -> int:
     ap.add_argument("--rules", metavar="FILE", default=RULES_PATH, help="판정 표 경로")
     ap.add_argument("--fail-on", choices=["never", "strong", "medium", "weak"],
                     default="strong", help="이 등급이 나오면 종료 코드 1 (기본 strong)")
-    ap.add_argument("--loose", action="store_true",
-                    help="provenance·canonical·drift·X-level·protocol 처럼 정식 "
-                         "용어로도 흔히 쓰이는 낱말은 넘어간다")
     ap.add_argument("--no-color", action="store_true")
     args = ap.parse_args()
 
@@ -672,7 +666,7 @@ def main() -> int:
     advice = {d["id"]: d["advice"][args.lang] for d in rules["detectors"]}
 
     text = strip_running_heads(extract_text(args.path))
-    rep = analyze(text, rules, not args.loose)
+    rep = analyze(text, rules)
 
     if args.dump_text:
         with open(args.dump_text, "w", encoding="utf-8") as f:

@@ -103,12 +103,6 @@ button.primary {
 }
 button.ghost { font-size: .95rem; padding: .45rem .95rem; color: var(--dim); }
 
-.opt {
-  display: inline-flex; align-items: center; gap: .4rem;
-  font-size: .95rem; color: var(--dim); cursor: pointer; flex: none;
-}
-.opt input { accent-color: var(--accent); }
-
 .status { margin: 1.1rem 0 0; font-size: 1rem; color: var(--dim); }
 
 .progress { margin: 1.75rem 0; }

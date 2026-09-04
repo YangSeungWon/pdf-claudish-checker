@@ -20,7 +20,7 @@ def main() -> int:
     rules = cc.load_rules()
     with open(sys.argv[1], encoding="utf-8") as f:
         text = f.read()
-    rep = cc.analyze(text, rules, "--loose" not in sys.argv)
+    rep = cc.analyze(text, rules)
     json.dump({
         "words": rep["words"],
         "sentences": len(rep["sentences"]),
