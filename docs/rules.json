@@ -1,0 +1,675 @@
+{
+  "version": 1,
+  "_note": "CLI(claudish_check.py)와 웹이 함께 읽는 유일한 판정 표. 정규식은 파이썬 re 와 JS RegExp 가 똑같이 해석하는 문법만 씁니다: 리터럴, [] 문자군, \\b \\s, (?: ), | , ^ $, (?= ), (?! ), 반복. 뒤돌아보기(lookbehind)와 \\w \\d 는 두 엔진의 유니코드 처리가 달라 쓰지 않습니다. patterns 항목은 문자열이거나 {\"re\":..., \"guards\":[...], \"skip\":[...]} 형태입니다. 모든 패턴은 문장 하나에 대해, JS RegExp 와 같도록 ASCII 모드(파이썬은 re.ASCII)로 검사합니다. 갈래에 caseSensitive:true 를 주면 대소문자를 구분하고, repeatLimit:N 을 주면 같은 문자열이 N개 문장을 넘겨 나올 때 그 논문의 용어로 보아 제외합니다. notInQuotes:true 인 갈래는 큰따옴표 안(면담 인용문 등)에서 나온 것을 세지 않습니다. 패턴에 opt:true 를 주면 '정식 용어로도 흔한' 낱말로 표시됩니다. 기본은 켜져 있고, CLI --loose / 웹 체크상자 해제로 끕니다.",
+  "options": {
+    "minSentenceWords": 3,
+    "emdashPerSentence": 2,
+    "restateJaccard": 0.55,
+    "restateMinContent": 6,
+    "clauseJaccard": 0.6,
+    "clauseMinContent": 2,
+    "beatShortWords": 7,
+    "beatLongWords": 10,
+    "anaphoraWords": 2,
+    "beatMaxContent": 3,
+    "anaphoraRun": 3,
+    "beatOpeners": [
+      "that",
+      "this",
+      "it",
+      "and",
+      "but",
+      "yet",
+      "so",
+      "which",
+      "there",
+      "nothing",
+      "none",
+      "all",
+      "either",
+      "neither",
+      "hence",
+      "thus",
+      "again"
+    ]
+  },
+  "bands": [
+    {
+      "max": 2.0,
+      "id": "clean"
+    },
+    {
+      "max": 5.0,
+      "id": "light"
+    },
+    {
+      "max": 12.0,
+      "id": "some"
+    },
+    {
+      "max": null,
+      "id": "heavy"
+    }
+  ],
+  "stopwords": [
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "been",
+    "being",
+    "but",
+    "by",
+    "can",
+    "could",
+    "did",
+    "do",
+    "does",
+    "for",
+    "from",
+    "had",
+    "has",
+    "have",
+    "he",
+    "her",
+    "here",
+    "him",
+    "his",
+    "how",
+    "i",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "its",
+    "may",
+    "might",
+    "more",
+    "most",
+    "must",
+    "no",
+    "not",
+    "of",
+    "on",
+    "one",
+    "or",
+    "our",
+    "out",
+    "over",
+    "own",
+    "she",
+    "should",
+    "so",
+    "some",
+    "such",
+    "than",
+    "that",
+    "the",
+    "their",
+    "them",
+    "then",
+    "there",
+    "these",
+    "they",
+    "this",
+    "those",
+    "through",
+    "to",
+    "too",
+    "under",
+    "up",
+    "was",
+    "we",
+    "were",
+    "what",
+    "when",
+    "where",
+    "which",
+    "while",
+    "who",
+    "why",
+    "will",
+    "with",
+    "would",
+    "you",
+    "your",
+    "am",
+    "any",
+    "about",
+    "after",
+    "again",
+    "all",
+    "also",
+    "because",
+    "before",
+    "between",
+    "both",
+    "each",
+    "very",
+    "just",
+    "only",
+    "other",
+    "same"
+  ],
+  "detectors": [
+    {
+      "id": "assistant",
+      "level": "strong",
+      "weight": 5,
+      "label": {
+        "en": "Assistant voice",
+        "ko": "어시스턴트 말투"
+      },
+      "advice": {
+        "en": "Chat-assistant phrasing left in the text. Delete the sentence or rewrite it as a statement about the work.",
+        "ko": "주고받는 대화에서 쓰는 말이 그대로 남았습니다. 지우거나 연구 내용을 말하는 문장으로 고치세요."
+      },
+      "patterns": [
+        "^(?:let me\\s+(?:be|explain|start|walk|know|clarify|first)|i'?ll\\s+(?:be|walk|start|explain|note|flag))\\b",
+        "^(?:sure|certainly|absolutely|of course|great)[,!.]",
+        "\\bas an ai\\b",
+        "\\bi'?m (?:an ai|a language model|claude)\\b",
+        "\\bhope (?:this|that) helps\\b",
+        "\\bfeel free to\\b",
+        "\\blet me know if\\b",
+        "\\bwould you like me to\\b",
+        "\\bhappy to (?:help|dig|walk|expand|elaborate)\\b",
+        "\\bhere'?s (?:a|the) (?:quick |short |brief )?(?:rundown|breakdown|summary) (?:of|for) you\\b",
+        "\\bi (?:cannot|can'?t) (?:help|assist) with\\b"
+      ],
+      "notInQuotes": true
+    },
+    {
+      "id": "validation",
+      "level": "strong",
+      "weight": 4,
+      "label": {
+        "en": "Validation / candor framing",
+        "ko": "맞장구·솔직함 연출"
+      },
+      "advice": {
+        "en": "Delete it. Say the thing itself unless the interpersonal meaning is the point.",
+        "ko": "지우세요. 상대를 향한 말이 꼭 필요한 자리가 아니면 내용만 쓰면 됩니다."
+      },
+      "patterns": [
+        "\\byou'?(?:re| are) (?:absolutely|completely|entirely|totally|exactly) right\\b",
+        "\\b(?:great|excellent|good|fair) (?:question|catch|point|call)\\b",
+        "\\bfair (?:hit|enough)\\b",
+        "\\b(?:one |the )?honest (?:caveat|answer|take|assessment|version|truth)\\b",
+        "\\bto be (?:honest|direct|blunt|fair|frank)\\b",
+        "\\bi'?ll be (?:direct|honest|blunt|frank)\\b",
+        "\\bthe (?:real|honest) talk\\b",
+        "\\bcredit where (?:it'?s|it is) due\\b"
+      ],
+      "notInQuotes": true
+    },
+    {
+      "id": "staged",
+      "level": "strong",
+      "weight": 3,
+      "label": {
+        "en": "Staged emphasis",
+        "ko": "예고형 강조"
+      },
+      "advice": {
+        "en": "Announcing that a point is important does not make it so. Drop the label and state the point.",
+        "ko": "중요하다고 예고하지 말고 그 내용을 바로 쓰세요."
+      },
+      "patterns": [
+        "\\bthe (?:key|crucial|critical|important|real|deeper|deepest|central|core|actual|essential|fundamental|underlying) (?:distinction|difference|point|question|insight|issue|tension|thing|problem|constraint|takeaway|move|trick)\\b",
+        "\\bthe (?:cleanest|simplest|clearest|easiest|best|right) way to (?:see|think about|understand|frame|put)\\b",
+        "\\bthe (?:verdict|smoking gun|punchline|upshot|takeaway|kicker|crux)\\b",
+        "\\bhere'?s (?:the (?:thing|catch|rub|key|kicker|problem|tension|twist)|what(?:'?s| is) (?:really |actually )?(?:going on|happening|at stake))\\b",
+        "\\bwhat (?:really |actually )?matters (?:here )?is\\b",
+        "\\bthe (?:deeper|bigger|larger|wider|broader) (?:point|question|issue|story)\\b",
+        "\\bit'?s worth (?:noting|emphasi[sz]ing|stressing|saying|dwelling)\\b",
+        "^(?:importantly|crucially|notably|critically|tellingly|strikingly|significantly)[,:]",
+        "\\bthe (?:whole|entire) point (?:is|here)\\b",
+        "\\bmake no mistake\\b",
+        "\\bthat'?s the (?:whole|entire) (?:point|game|idea)\\b",
+        "\\bthis is where [^.;:]{1,40} comes? in\\b",
+        "\\bit turns out that\\b",
+        "^notice that\\b",
+        "^consider (?:a|an|the|what|how|why|two|three)\\b",
+        "\\b(?:two|three|four|several) things (?:follow|stand out|are worth|to note)\\b",
+        "\\bthere are a few things to note\\b",
+        "\\bthis matters because\\b",
+        "\\bwhich is (?:exactly|precisely) why\\b",
+        "\\bthe reality is\\b",
+        "\\bworth (?:flagging|calling out|highlighting|underscoring)\\b",
+        "\\bis doing a lot of (?:the )?work\\b",
+        "\\bat the heart of\\b",
+        "\\bthe elephant in the room\\b"
+      ]
+    },
+    {
+      "id": "aphorism",
+      "level": "strong",
+      "weight": 3,
+      "label": {
+        "en": "Aphoristic closer",
+        "ko": "격언조 마무리"
+      },
+      "advice": {
+        "en": "A closing fragment that repeats what the previous sentence already said. Delete it.",
+        "ko": "앞 문장을 한 번 더 말하는 마무리입니다. 지우세요."
+      },
+      "patterns": [
+        "^(?:and |but )?that(?:'?s| is) (?:the (?:whole |actual |real )?(?:point|boundary|distinction|difference|constraint|question|answer|tradeoff|trade-off|catch|rub|job|bar|test|goal|risk|cost|line|bet|deal|price)|why\\b|what\\b)",
+        "^that (?:distinction|difference|constraint|boundary|gap|tension|part) (?:matters|counts|is what|does)\\b",
+        "^(?:nothing more, ?nothing less|no more, ?no less|full stop|period)[.!]?$",
+        "^(?:and )?(?:that|this) is the (?:actual|real|whole) [a-z]+\\.?$",
+        "^(?:it|that|this) (?:is|'s) (?:as simple as that|that simple|the bar|the line)\\b",
+        "^(?:everything else|the rest) (?:is|follows) [a-z ]{0,25}\\.$"
+      ]
+    },
+    {
+      "id": "contrast",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Manufactured contrast",
+        "ko": "만들어낸 대조"
+      },
+      "advice": {
+        "en": "Setting up a wrong version to reject adds no information. State the claim once.",
+        "ko": "아닌 쪽을 세워 두고 부정하는 구조입니다. 주장을 한 번만 쓰세요."
+      },
+      "patterns": [
+        "\\bnot (?:just|only|merely|simply|so much) [^.;:]{1,60}?\\bbut\\b",
+        "\\b(?:isn'?t|aren'?t|is not|are not|wasn'?t|weren'?t|was not|were not) [^.:]{1,60}?\\bit(?:'?s| is)\\b",
+        "\\bless (?:a|an|about) [^.;:]{1,45}?\\bthan\\b",
+        "\\bnot because [^.;:]{1,70}?\\bbut because\\b",
+        "\\bit'?s not that\\b[^.;:]{1,90}?\\bit'?s that\\b",
+        "\\bthe (?:difference|distinction|question|issue|problem) (?:isn'?t|is not)\\b",
+        "\\bthink (?:of it )?(?:less as|not as) [^.;:]{1,45}?\\b(?:and )?more as\\b",
+        ", not [a-z][a-z ]{0,40}[.]$",
+        "\\bnot (?:whether|that|about|because of) [^.;:]{1,60}?\\bbut\\b",
+        "\\bnot so much [^.;:]{1,50}?\\bas\\b",
+        "^far from (?:being )?[^.;:]{1,50},",
+        "^rather than [^.;:]{1,60},",
+        "\\bit would be a mistake to\\b",
+        "\\bit(?:'?s| is) tempting to [^.;:]{1,60}?\\bbut\\b",
+        "\\bthe point is not\\b"
+      ]
+    },
+    {
+      "id": "orient",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Redundant orientation",
+        "ko": "군더더기 안내"
+      },
+      "advice": {
+        "en": "Announcing a restatement usually means the restatement is unnecessary. Keep one version.",
+        "ko": "다시 말하겠다는 예고 자체가 그 반복이 필요 없다는 뜻입니다. 한 번만 쓰세요."
+      },
+      "patterns": [
+        "\\bin (?:one|a single) sentence\\b",
+        "\\bput (?:differently|another way|simply|plainly)\\b",
+        "\\bin other words\\b",
+        "\\bto be clear\\b",
+        "\\bthat said\\b",
+        "\\bat its core\\b",
+        "\\bin short\\b",
+        "\\bsimply put\\b",
+        "\\bstated (?:plainly|simply|differently)\\b",
+        "\\bthe (?:short|quick|one[ -]line) (?:answer|version|story)\\b",
+        "\\bthink of (?:it|this|them) as\\b",
+        "^ultimately[,:]",
+        "\\bboiled? down to\\b",
+        "\\bwhich is to say\\b",
+        "\\bthat is to say\\b",
+        "\\bwith that in mind\\b",
+        "\\bfor what it'?s worth\\b",
+        "\\bto a first approximation\\b",
+        "\\bin (?:some|a|a very real) sense\\b",
+        "^if anything\\b",
+        "\\bthe answer is that it depends\\b",
+        "^arguably[,\\s]",
+        "^fundamentally[,\\s]",
+        "^essentially[,\\s]"
+      ],
+      "notInQuotes": true
+    },
+    {
+      "id": "metaphor",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Structural metaphor",
+        "ko": "구조 은유"
+      },
+      "advice": {
+        "en": "Say the concrete relationship instead of the picture of it.",
+        "ko": "비유로 부르지 말고 실제 관계를 그대로 쓰세요."
+      },
+      "patterns": [
+        "\\bload[ -]bearing\\b",
+        "\\bgated on\\b",
+        "\\bhard (?:gate|stop|floor|ceiling|cutoff)\\b",
+        "\\bblast radius\\b",
+        "\\bguard ?rails?\\b",
+        "\\bnorth star\\b",
+        "\\b(?:single )?source of truth\\b",
+        "\\bmoving parts\\b",
+        "\\bsurfac(?:e|es|ed|ing) (?:the|a|an|these|those|this|that|it|them)\\b",
+        "\\b(?:was|were|gets?|got|being) surfaced\\b",
+        "\\bthe (?:happy|golden|critical|unhappy|sad) path\\b",
+        "\\bfirst[ -]class (?:citizen|concern|primitive|object)\\b",
+        {
+          "re": "\\bhand[ -]?off\\b",
+          "guards": [
+            "\\b(?:patient|nurse|shift|clinical|ward|surgeon|driver|baton|relay|pilot|controller|air traffic)\\b"
+          ]
+        },
+        {
+          "re": "\\bplumbing\\b",
+          "guards": [
+            "\\b(?:pipes?|water|bathroom|sink|drain|sewer|building|house|hvac)\\b"
+          ]
+        },
+        "\\bin the weeds\\b",
+        "\\bthe spine of\\b",
+        "\\bunder the hood\\b",
+        "\\bheavy lifting\\b",
+        "\\bmoves? the needle\\b",
+        "\\blow[ -]hanging fruit\\b",
+        "\\bat the end of the day\\b",
+        "\\bland(?:ed|s) (?:in|on) (?:main|master|trunk|production|the (?:repo|branch))\\b",
+        {
+          "re": "\\bthe [a-z]+ surface\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bthe [a-z]+ layer\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bthe (?:safest|shortest|obvious|easiest|only|right) path\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bhard boundary\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bblockers?\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bstale\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bcanonical\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bdrift(?:s|ed|ing)?\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bprovenance\\b",
+          "opt": true
+        },
+        {
+          "re": "\\blineage\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bcalibration\\b",
+          "opt": true
+        },
+        {
+          "re": "\\brouting\\b",
+          "opt": true
+        },
+        "\\bsits? at the intersection of\\b",
+        "\\ba lens through which\\b",
+        "\\bunpacks? (?:this|that|the|these)\\b",
+        "\\bspeaks to (?:a|an|the) (?:broader|larger|wider|deeper|more)\\b",
+        "\\bgestures? (?:at|toward|towards)\\b",
+        "\\bmaps? (?:onto|neatly onto)\\b",
+        "\\bcarves? (?:out|up)\\b",
+        "\\bthreads? the needle\\b",
+        "\\bcuts? both ways\\b",
+        "\\bdouble[- ]edged\\b",
+        "\\bthe flip side\\b",
+        "\\btable stakes\\b",
+        "\\borthogonal to\\b",
+        "\\b(?:down|up)stream of\\b",
+        "\\bthe space of possible\\b",
+        "\\bwrit large\\b",
+        "\\bstep (?:change|function)\\b",
+        "\\bfront and cent(?:er|re)\\b",
+        "\\bleverages? (?:the|a|an|our|their|existing)\\b",
+        "\\basymmetry between\\b"
+      ]
+    },
+    {
+      "id": "compound",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Hyphenated noun stack",
+        "ko": "붙여 만든 명사 덩어리"
+      },
+      "advice": {
+        "en": "Unpack it into a clause: \"approval-gated release\" is \"the release needs approval\".",
+        "ko": "절로 풀어 쓰세요. \"approval-gated release\" 는 \"릴리스에 승인이 필요하다\" 입니다."
+      },
+      "patterns": [
+        "\\b[a-z]{3,}-(?:gated|backed|side|first|safe|matched|layer|surface|path|boundary|adjacent|native)\\b",
+        {
+          "re": "\\b[a-z]{3,}-level\\b",
+          "opt": true
+        }
+      ],
+      "skip": [
+        "^(?:client|server|browser|host|device|edge|cloud|front|back|supply|demand|sell|buy|user|street|road)-side$",
+        "^(?:depth|breadth|best|left|right|head|tail|worst|hand)-first$",
+        "^(?:type|memory|thread|fail|null|crash|exception|context)-safe$",
+        "^(?:age|sex|gender|case|impedance|colou?r|pattern|hand|template|score|propensity|paired|sample|group|condition)-matched$",
+        "^(?:asset|gold|dollar|mortgage|government|venture|state|corporate|debt|equity|bond)-backed$",
+        "^(?:voltage|ligand|light|time|clock|current|sodium|potassium|calcium|chloride|ion|stretch|mechanically|proton)-gated$",
+        "^(?:multi|single|double|hidden|input|output|surface|boundary|ozone|physical|link|network|transport|application|session|convolution|convolutional|attention|embedding)-layer$",
+        "^(?:multi|single|shortest|critical|file|class|search|light|flight|sound|beam|ray|career|life|audio|signal)-path$",
+        "^(?:attack|response|contact|road|work|earth|water|sea|land|body|skin|touch|display|tangible|free|potential|equipotential|iso)-surface$",
+        "^(?:grain|phase|domain|cell|plate|class|word|morpheme|syllable|clause|region|county|state|country|property|national)-boundary$",
+        "^(?:cloud|digital|web|mobile|platform)-native$"
+      ],
+      "caseSensitive": true,
+      "repeatLimit": 3,
+      "_why": "X-level 은 연구 글에서 participant-level, condition-level 처럼 정상적으로 쓰이는 일이 훨씬 많아 뺐습니다."
+    },
+    {
+      "id": "abstract",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Invented abstraction",
+        "ko": "만들어낸 추상 명사"
+      },
+      "advice": {
+        "en": "Turn the noun back into a verb: \"a fact-preservation pass\" is \"preserve every fact\".",
+        "ko": "명사를 동사로 되돌리세요. \"a fact-preservation pass\" 는 \"사실을 하나도 빠뜨리지 않는다\" 입니다."
+      },
+      "patterns": [
+        "\\b(?:mandatory|hard|strict|firm|non-negotiable) (?:[a-z]+ ){0,2}(?:requirement|prerequisite|precondition|gate|constraint)\\b",
+        "\\b(?:authority|permission|access|the ability|the right) is (?:restricted|limited|reserved|confined) to\\b",
+        "\\b(?:a|an|the) [a-z]+-(?:preservation|reduction|compression|expansion|extraction|resolution|validation|verification|normali[sz]ation|selection|alignment|calibration) (?:pass|step|stage|phase|layer|exercise)\\b",
+        "\\bis (?:a|an) [a-z]+(?:-[a-z]+)+ (?:pass|surface|layer|primitive|abstraction|exercise|problem in disguise)\\b",
+        "\\bat (?:a|the) higher level of abstraction\\b",
+        "\\bthe (?:actual|underlying|real) (?:relationship|proposition|constraint|mechanism|shape) (?:here|being|that)\\b",
+        "\\bprovides? (?:verified|audited|confirmed) evidence of\\b"
+      ]
+    },
+    {
+      "id": "research",
+      "level": "weak",
+      "weight": 1,
+      "label": {
+        "en": "Over-formal vocabulary",
+        "ko": "과한 연구체 어휘"
+      },
+      "advice": {
+        "en": "Used as decoration rather than as a technical term. Say it in ordinary words.",
+        "ko": "기술 용어가 아니라 꾸밈으로 쓰였습니다. 평범한 말로 바꾸세요."
+      },
+      "patterns": [
+        "\\b(?:the|a|new|current|next) frontier\\b",
+        {
+          "re": "\\b(?:the|a|new|expanding|widening) horizon\\b",
+          "guards": [
+            "\\b(?:time|planning|event|forecast|rolling|finite|infinite|prediction) horizon\\b"
+          ]
+        },
+        {
+          "re": "\\bexchange rate\\b",
+          "guards": [
+            "\\b(?:currency|currencies|dollar|euro|yen|won|foreign|usd|krw|jpy|inflation|monetary)\\b"
+          ]
+        },
+        "\\bclaim gate\\b",
+        "\\b(?:raises?|raised|lifts?|lifted|sets?|lowers?|lowered) the (?:floor|ceiling|bar)\\b",
+        "\\bclears? the (?:bar|threshold)\\b",
+        "\\bsurvives? (?:contact|scrutiny|first contact)\\b",
+        "\\bheadline (?:number|result|finding|claim|figure)\\b",
+        "\\b(?:in|under) this regime\\b",
+        "\\bfrozen (?:snapshot|copy|version|slice)\\b",
+        "\\bslice (?:the|this) (?:data|results|sample|population)\\b",
+        {
+          "re": "\\bthe (?:overall |broad )?trajectory of\\b",
+          "guards": [
+            "\\b(?:motion|movement|robot|hand|eye|gaze|ball|flight|orbit|projectile|joint|limb|particle|vehicle)\\b"
+          ]
+        },
+        "\\bimplicates? (?:a|an|the) [a-z]+ (?:mechanism|process|account)\\b",
+        {
+          "re": "\\bconfirmatory\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bprotocols?\\b",
+          "opt": true
+        },
+        {
+          "re": "\\blower bounds?\\b",
+          "opt": true
+        },
+        {
+          "re": "\\b(?:each|every|the) cells? of the\\b",
+          "opt": true
+        },
+        {
+          "re": "\\bmatched (?:control|sample|pair)",
+          "opt": true
+        },
+        "\\bnon-?trivial\\b",
+        "\\bnon-?obvious\\b",
+        "\\b(?:first|second|higher)[- ]order (?:concern|effect|question|issue|problem|approximation)\\b",
+        "\\bin the wild\\b",
+        "\\bat scale\\b",
+        "\\ba principled (?:approach|account|way|treatment|basis)\\b",
+        "\\ba robust (?:account|story|picture|treatment|notion)\\b",
+        "\\bmeaningfully\\b",
+        "\\bmaterially (?:changes?|different|affects?|alters?)\\b",
+        "\\bmodulo\\b"
+      ]
+    },
+    {
+      "id": "rhythm",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Rhetorical rhythm",
+        "ko": "문장 리듬"
+      },
+      "advice": {
+        "en": "A beat staged for effect. Join it to the neighbouring sentence or cut it.",
+        "ko": "효과를 노린 박자입니다. 앞뒤 문장에 붙이거나 지우세요."
+      },
+      "patterns": [
+        "^(?:and|but|yet|so|still|again|or)\\b[^.!?]{0,55}[.!?]?$",
+        ":\\s*[a-z][a-z-]*, [a-z][a-z-]*, and [a-z][a-z-]*\\b"
+      ]
+    },
+    {
+      "id": "beat",
+      "kind": "structural",
+      "level": "weak",
+      "weight": 1,
+      "label": {
+        "en": "Staged beat",
+        "ko": "한 마디 연출"
+      },
+      "advice": {
+        "en": "A short sentence dropped after a long one, or the same opening repeated. Effect, not information.",
+        "ko": "긴 문장 뒤에 툭 던진 한 마디이거나, 같은 첫머리를 세 번 되풀이한 것입니다. 정보가 아니라 효과입니다."
+      }
+    },
+    {
+      "id": "triad",
+      "level": "weak",
+      "weight": 1,
+      "label": {
+        "en": "Rule of three",
+        "ko": "셋씩 늘어놓기"
+      },
+      "advice": {
+        "en": "Three parallel modifiers where one would do. Keep the one that carries information.",
+        "ko": "하나면 될 자리에 셋을 늘어놓았습니다. 뜻이 있는 하나만 남기세요."
+      },
+      "patterns": [
+        "\\b[a-z]+(?:ly|ic|al|ive|ed|ing|ous|able|ent|ant), [a-z]+(?:ly|ic|al|ive|ed|ing|ous|able|ent|ant), and [a-z]+(?:ly|ic|al|ive|ed|ing|ous|able|ent|ant)\\b",
+        "\\b[a-z]+ly [a-z-]+, (?:[a-z]+ly )?[a-z-]+, and (?:[a-z]+ly )?[a-z-]+\\b"
+      ]
+    },
+    {
+      "id": "emdash",
+      "kind": "structural",
+      "level": "weak",
+      "weight": 1,
+      "label": {
+        "en": "Em dash pile-up",
+        "ko": "줄표 남발"
+      },
+      "advice": {
+        "en": "Two or more em dashes in one sentence. Usually an aside that can be cut or made its own sentence.",
+        "ko": "한 문장에 줄표가 둘 이상입니다. 잘라내거나 따로 문장으로 만드세요."
+      }
+    },
+    {
+      "id": "restate",
+      "kind": "structural",
+      "level": "medium",
+      "weight": 2,
+      "label": {
+        "en": "Restatement",
+        "ko": "같은 말 반복"
+      },
+      "advice": {
+        "en": "This says what the neighbouring text already said. Keep one version.",
+        "ko": "옆 문장이 이미 한 말입니다. 하나만 남기세요."
+      }
+    }
+  ],
+  "boilerplate": [
+    "Permission to make digital or hard copies",
+    "Request permissions from",
+    "Copyright held by the owner",
+    "Manuscript submitted to",
+    "This work is licensed under a Creative Commons",
+    "ACM Reference Format",
+    "^CCS Concepts",
+    "^Additional Key Words and Phrases",
+    "^(?:Preprint|Under review|Submitted to)\\b",
+    "arXiv:[0-9]{4}\\.[0-9]{4,5}"
+  ]
+}

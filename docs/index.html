@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claudish Checker</title>
+<meta name="description" content="Find Claude-flavoured sentences in a paper draft. Runs entirely in your browser.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩻</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="top">
+  <div>
+    <h1 data-i18n="title">Claudish Checker</h1>
+    <p class="tagline" data-i18n="tagline"></p>
+  </div>
+  <div class="lang" id="lang" role="group" aria-label="Language"></div>
+</header>
+
+<main>
+  <section id="pick" class="panel">
+    <div id="drop" class="drop" tabindex="0" role="button">
+      <span class="drop-icon" aria-hidden="true">📄</span>
+      <strong data-i18n="drop"></strong>
+      <span class="drop-sub" data-i18n="dropSub"></span>
+    </div>
+
+    <div id="preview" class="preview" hidden>
+      <canvas id="thumb" class="thumb"></canvas>
+      <div class="pv-meta">
+        <div id="filename" class="filename"></div>
+        <div id="pv-pages" class="pv-pages"></div>
+        <button id="change" class="ghost">
+          <span aria-hidden="true">↻</span> <span data-i18n="newFile"></span>
+        </button>
+      </div>
+    </div>
+
+    <input id="file" type="file" accept="application/pdf" hidden>
+    <div id="run-row" class="actions" hidden>
+      <button id="run" class="primary">
+        <span aria-hidden="true">▶</span> <span data-i18n="run"></span>
+      </button>
+      <label class="opt"><input type="checkbox" id="strict">
+        <span data-i18n="strict"></span></label>
+    </div>
+  </section>
+
+  <div id="filebar" class="filebar" hidden>
+    <span class="fb-icon" aria-hidden="true">📄</span>
+    <span id="fb-name" class="fb-name"></span>
+    <label class="opt"><input type="checkbox" id="strict2">
+      <span data-i18n="strict"></span></label>
+    <button id="reset" class="ghost"><span aria-hidden="true">↻</span> <span data-i18n="newFile"></span></button>
+  </div>
+
+  <div id="progress" class="progress" hidden>
+    <div class="pg-main">
+      <b id="pg-n">0</b><span class="pg-slash">/</span><span id="pg-t">0</span>
+      <span id="pg-u" class="pg-u"></span>
+    </div>
+    <div id="pg-sub" class="pg-sub"></div>
+    <div class="pg-track"><div id="bar"></div></div>
+  </div>
+  <p id="status" class="status"></p>
+
+  <section id="summary" class="summary" hidden></section>
+  <section id="results" class="results"></section>
+
+  <details id="debug" class="panel debug" hidden>
+    <summary data-i18n="debug"></summary>
+    <div id="debug-body"></div>
+  </details>
+
+  <div id="restart" class="restart" hidden>
+    <button id="reset-bottom" class="ghost">
+      <span aria-hidden="true">↻</span> <span data-i18n="newFile"></span>
+    </button>
+  </div>
+</main>
+
+<footer class="foot">
+  <p>
+    <span aria-hidden="true">🔒</span> <span data-i18n="footPrivacy"></span> ·
+    pdf.js v<span id="pdfjs-version">?</span> ·
+    <a href="rules.json">rules.json</a>
+  </p>
+</footer>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
